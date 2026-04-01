@@ -1,0 +1,50 @@
+using UnityEngine;
+
+public class enemymovment : MonoBehaviour
+{
+    [SerializeField] private Rigidbody2D rigidBody;
+    [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private float speed = 3f;
+    [SerializeField] private int startDirection = 1;
+
+    private int currentDirection;
+    private float halfWidth;
+    private Vector2 movement;
+
+    void Start()
+    {
+        halfWidth = spriteRenderer.bounds.extents.x;
+        currentDirection = startDirection;
+        spriteRenderer.flipX = startDirection != 1;
+    }
+
+    private void FixedUpdate()  // Fix 1: Capital F
+    {
+        SetDirection();         // Fix 2: Actually call SetDirection
+        movement.x = speed * currentDirection;
+        movement.y = rigidBody.velocity.y;
+        rigidBody.velocity = movement;
+    }
+
+    private void SetDirection()
+    {
+        // Fix 3: Parentheses corrected — LayerMask is now the 4th argument
+        // Fix 4 & 5: Check velocity.x direction instead of angularVelocity.x
+        // Fix 6: Consistent layer name "Ground"
+        if (Physics2D.Raycast(transform.position, Vector2.right, halfWidth + 0.1f, LayerMask.GetMask("Ground"))
+            && rigidBody.velocity.x > 0)
+        {
+            currentDirection *= -1;
+            spriteRenderer.flipX = true;
+        }
+        else if (Physics2D.Raycast(transform.position, Vector2.left, halfWidth + 0.1f, LayerMask.GetMask("Ground"))
+            && rigidBody.velocity.x < 0)   // left check should be < 0
+        {
+            currentDirection *= -1;
+            spriteRenderer.flipX = false;
+        }
+
+        Debug.DrawRay(transform.position, Vector2.right * (halfWidth + 0.1f), Color.red);
+        Debug.DrawRay(transform.position, Vector2.left * (halfWidth + 0.1f), Color.red);
+    }
+}
